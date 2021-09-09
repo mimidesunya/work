@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 
-void linear_search() {
-	FILE* fp = fopen("2007.csv", "r");
+void search(const char *file, const char *number) {
+	FILE* fp = fopen(file, "r");
 	char line[1000];
 
 	while(fgets(line, sizeof line, fp)) {
-		if (strstr(line, "0857-53-1777")) {
+		if (strstr(line, number)) {
 			printf("%s", line);
 			break;
 		}
@@ -14,6 +14,6 @@ void linear_search() {
 	fclose(fp);
 }
 
-void main() {
-	linear_search();
+void main(const char *argv[], int argc) {
+	search(argv[1], argv[2]);
 }
