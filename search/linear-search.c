@@ -14,6 +14,6 @@ void search(const char *file, const char *number) {
 	fclose(fp);
 }
 
-void main(const char *argv[], int argc) {
+void main(int argc, const char *argv[]) {
 	search(argv[1], argv[2]);
 }
