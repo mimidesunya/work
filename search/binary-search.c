@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-void print_by_position(size_t pos) {
-	FILE *fp = fopen("2007.csv", "r");
+void print_by_position(const char *file, size_t pos) {
+	FILE *fp = fopen(file, "r");
         fseek(fp, pos, SEEK_SET);
 	char line[1000];
 	fgets(line, sizeof line, fp);
@@ -11,35 +11,35 @@ void print_by_position(size_t pos) {
 	printf("%s", line);
 }
 
-void binary_search() {
-	FILE *index = fopen("2007.index", "r");
+void binary_search(const char *file, const char*index, const char *number) {
+	FILE *ip = fopen(index, "r");
 	char num[13];
 	char pos[11];
 	const size_t LINE_SIZE = 12+10+2;
 	size_t top, bottom, middle;
 
 	top = 0;
-	fseek(index, 0, SEEK_END);
-	bottom = ftell(index) / LINE_SIZE;
+	fseek(ip, 0, SEEK_END);
+	bottom = ftell(ip) / LINE_SIZE;
 
-	while(top != bottom) {
+	while(top < bottom) {
 		middle = (top + bottom) / 2;
-		fseek(index, middle * LINE_SIZE, SEEK_SET);
-		fscanf(index, "%s %s\n", num, pos);
-		int ret = strcmp(num, "0857-53-1777");
+		fseek(ip, middle * LINE_SIZE, SEEK_SET);
+		fscanf(ip, "%s %s\n", num, pos);
+		int ret = strcmp(num, number);
 		if (ret == 0) {
-			print_by_position(atoi(pos));
+			print_by_position(file, atoi(pos));
 			break;
 		}
 		if (ret < 0) {
-			top = middle;
+			top = middle + 1;
 			continue;
 		}
 		bottom = middle;
 	}
-	fclose(index);
+	fclose(ip);
 }
 
-void main() {
-	binary_search();
+void main(int argc, const char *argv[]) {
+	binary_search(argv[1], argv[2], argv[3]);
 }

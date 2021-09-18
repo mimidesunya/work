@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-void print_by_position(size_t pos) {
-	FILE *fp = fopen("2007.csv", "r");
+void print_by_position(const char *file, size_t pos) {
+	FILE *fp = fopen(file, "r");
         fseek(fp, pos, SEEK_SET);
 	char line[1000];
 	fgets(line, sizeof line, fp);
@@ -11,20 +11,20 @@ void print_by_position(size_t pos) {
 	printf("%s", line);
 }
 
-void linear_search_with_index() {
-	FILE *index = fopen("2007.index", "r");
+void linear_search_with_index(const char *file, const char *index, const char *number) {
+	FILE *ip = fopen(index, "r");
 	char num[13];
 	char pos[11];
 
-	while(fscanf(index, "%s %s\n", num, pos) != EOF) {
-		if (strstr(num, "0857-53-1777")) {
-			print_by_position(atoi(pos));
+	while(fscanf(ip, "%s %s\n", num, pos) != EOF) {
+		if (strstr(num, number)) {
+			print_by_position(file, atoi(pos));
 			break;
 		}
 	}
-	fclose(index);
+	fclose(ip);
 }
 
-void main() {
-	linear_search_with_index();
+void main(int argc, const char *argv[]) {
+	linear_search_with_index(argv[1], argv[2], argv[3]);
 }
