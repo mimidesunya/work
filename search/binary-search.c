@@ -28,7 +28,7 @@ void binary_search(const char *file, const char*index, const char *number) {
 		fscanf(ip, "%s %s\n", num, pos);
 		int ret = strcmp(num, number);
 		if (ret == 0) {
-			print_by_position(file, atoi(pos));
+			print_by_position(file, atol(pos));
 			break;
 		}
 		if (ret < 0) {
