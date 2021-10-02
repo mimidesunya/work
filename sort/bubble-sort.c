@@ -19,20 +19,33 @@ void main(int argc, const char *argv[]) {
 	const char *file = argv[1];
 	const char *index = argv[2];
 	char *data = (char*)malloc(100L * 30000000L);
+	if (!data) {
+		return;
+	}
 	char **list = (char**)malloc(30000000L);
+	if (!list) {
+		return;
+	}
 	char line[1000];
 	FILE *fp = fopen(file, "r");
 	char *pdata = data;
 	size_t i = 0;
 	while (fgets(line, sizeof line, fp)) {
+		int len = strlen(line);
+		if (len >= 1000) {
+			break;
+		}
 		char *comma = strchr(line, ',') + 1;
 		char *comma2 = strchr(comma, ',');
 		*comma2 = 0;
 		strcpy(pdata, comma);
 		list[i] = pdata;
-		pdata += strlen(comma) + 1;
+		pdata += len + 1;
 		i++;
-		if (i >= 3000) {
+		if ((pdata - data) >= 100L * 30000000L) {
+			return;
+		}
+		if (i >= 1000) {
 			break;
 		}
 	}
