@@ -2,17 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define NAME_SIZE 250
-
-void bubble_sort(char *list, const int size) {
-	char tmp[NAME_SIZE];
+void bubble_sort(char **list, const int size) {
+	char *tmp;
 	for (int i = 0; i < size - 1; ++i) {
-		char *a = list + i * NAME_SIZE;
-		char *b = list + (i + 1) * NAME_SIZE;
-		if (strcmp(a, b) > 0) {
-			strcpy(tmp, a);
-			strcpy(a, b);
-			strcpy(b, tmp);
+		if (strcmp(list[i], list[i + 1]) > 0) {
+			tmp = list[i];
+			list[i] = list[i + 1];
+			list[i + 1] = tmp;
 			i = 0;
 			continue;
 		}
@@ -22,33 +18,35 @@ void bubble_sort(char *list, const int size) {
 void main(int argc, const char *argv[]) {
 	const char *file = argv[1];
 	const char *index = argv[2];
-	char *list = (char*)malloc(NAME_SIZE * 30000000L);
+	char *data = (char*)malloc(100L * 30000000L);
+	char **list = (char**)malloc(30000000L);
 	char line[1000];
 	FILE *fp = fopen(file, "r");
-	char *i = list;
+	char *pdata = data;
+	size_t i = 0;
 	while (fgets(line, sizeof line, fp)) {
 		char *comma = strchr(line, ',') + 1;
 		char *comma2 = strchr(comma, ',');
 		*comma2 = 0;
-		strcpy(i, comma);
-		i += NAME_SIZE;
-		if ((i - list) / NAME_SIZE >= 1000) {
+		strcpy(pdata, comma);
+		list[i] = pdata;
+		pdata += strlen(comma) + 1;
+		i++;
+		if (i >= 3000) {
 			break;
 		}
 	}
 	fclose(fp);
 	
 	printf("Sorting ... \n");
-	const int size = (i - list) / NAME_SIZE;
-	bubble_sort(list, size);
+	bubble_sort(list, i);
 
 	FILE *ip = fopen(index, "w");
-	i = list;
-	for (int j = 0; j < size; ++j) {
-		fprintf(ip, "%s\n", i);
-		i += NAME_SIZE;
+	for (int j = 0; j < i; ++j) {
+		fprintf(ip, "%s\n", list[j]);
 	}
 	fclose(ip);
 
 	free(list);
+	free(data);
 }
