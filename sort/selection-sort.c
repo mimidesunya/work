@@ -3,21 +3,20 @@
 #include <string.h>
 #include <stdbool.h>
 
-void bubble_sort(char **list, int size) {
-	char *tmp;
-	bool swapped;
-	do {
-		swapped = false;
-		for (int i = 1; i < size; ++i) { 
-			if (strcmp(list[i - 1], list[i]) > 0) {
-				tmp = list[i - 1];
-				list[i - 1] = list[i];
-				list[i] = tmp;
-				swapped = true;
+void selection_sort(char **list, int size) {
+	for (int i = 0; i < size - 1; ++i) {
+		int min = i;
+		for (int j = i + 1; j < size; ++j) {
+			if (strcmp(list[min], list[j]) > 0) {
+				min = j;
 			}
 		}
-		--size;
-	} while(swapped);
+		if (min != i) {
+                	char *tmp = list[min];
+                	list[min] = list[i];
+                	list[i] = tmp;
+		}
+	}
 }
 
 void main(int argc, const char *argv[]) {
@@ -57,7 +56,7 @@ void main(int argc, const char *argv[]) {
 	fclose(fp);
 	
 	printf("Sorting ... \n");
-	bubble_sort(list, i);
+	selection_sort(list, i);
 
 	FILE *ip = fopen(index, "w");
 	for (int j = 0; j < i; ++j) {
