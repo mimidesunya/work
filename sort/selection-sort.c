@@ -3,16 +3,21 @@
 #include <string.h>
 #include <stdbool.h>
 
-void selection_sort(char **list, int size) {
+typedef struct {
+	char* str;
+	size_t pos;
+} entry_t;
+
+void selection_sort(entry_t *list, int size) {
 	for (int i = 0; i < size - 1; ++i) {
 		int min = i;
 		for (int j = i + 1; j < size; ++j) {
-			if (strcmp(list[min], list[j]) > 0) {
+			if (strcmp(list[min].str, list[j].str) > 0) {
 				min = j;
 			}
 		}
 		if (min != i) {
-                	char *tmp = list[min];
+                	entry_t tmp = list[min];
                 	list[min] = list[i];
                 	list[i] = tmp;
 		}
@@ -26,32 +31,25 @@ void main(int argc, const char *argv[]) {
 	if (!data) {
 		return;
 	}
-	char **list = (char**)malloc(30000000L);
+	entry_t *list = (entry_t*)malloc(sizeof(entry_t) * 30000000L);
 	if (!list) {
 		return;
 	}
-	char line[1000];
+	char line[300];
 	FILE *fp = fopen(file, "r");
 	char *pdata = data;
 	size_t i = 0;
+	size_t pos = 0;
 	while (fgets(line, sizeof line, fp)) {
-		int len = strlen(line);
-		if (len >= 1000) {
-			break;
-		}
 		char *comma = strchr(line, ',') + 1;
 		char *comma2 = strchr(comma, ',');
 		*comma2 = 0;
 		strcpy(pdata, comma);
-		list[i] = pdata;
-		pdata += len + 1;
+		list[i].str = pdata;
+		list[i].pos = pos;
+		pdata += comma2 - comma + 1;
 		i++;
-		if ((pdata - data) >= 100L * 30000000L) {
-			return;
-		}
-		if (i >= 10000) {
-			break;
-		}
+		pos = ftell(fp);
 	}
 	fclose(fp);
 	
@@ -60,7 +58,7 @@ void main(int argc, const char *argv[]) {
 
 	FILE *ip = fopen(index, "w");
 	for (int j = 0; j < i; ++j) {
-		fprintf(ip, "%s\n", list[j]);
+		fprintf(ip, "%010ld %-200s\n", list[j].pos, list[j].str);
 	}
 	fclose(ip);
 
