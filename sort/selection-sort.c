@@ -35,7 +35,7 @@ void main(int argc, const char *argv[]) {
 	if (!list) {
 		return;
 	}
-	char line[300];
+	char line[700];
 	FILE *fp = fopen(file, "r");
 	char *pdata = data;
 	size_t i = 0;
@@ -50,11 +50,15 @@ void main(int argc, const char *argv[]) {
 		pdata += comma2 - comma + 1;
 		i++;
 		pos = ftell(fp);
+		if (i > 100000) {
+			break;
+		}
 	}
 	fclose(fp);
 	
 	printf("Sorting ... \n");
 	selection_sort(list, i);
+	printf("Output ... \n");
 
 	FILE *ip = fopen(index, "w");
 	for (int j = 0; j < i; ++j) {
