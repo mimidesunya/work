@@ -41,7 +41,9 @@ entry_t dequeue(entry_t *list, int size) {
 }
 
 void heap_sort(entry_t *list, int size) {
+	printf("build heap\n");
 	build_heap(list, size);
+	printf("sort\n");
 	for (int i = size; i >= 1; --i) {
 		list[i - 1] = dequeue(list, i);
 	}
