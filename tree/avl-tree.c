@@ -208,8 +208,8 @@ void main(int argc, const char *argv[]) {
 		size_t length = comma2 - line + 1;
 		memcpy(pdata, line, length);
 		
-		node->name = pdata;
-		node->number = pdata + (comma - line) + 1;
+		node->number = pdata;
+		node->name = pdata + (comma - line) + 1;
 		
 		root = insert(root, node);
 		
@@ -225,6 +225,6 @@ void main(int argc, const char *argv[]) {
 	fclose(fp);
 	
 	printf("search\n");
-	node_t* hit = search(root, "011-200-1715");
+	node_t* hit = search(root, "花うさぎ");
 	printf("%s,%s\n", hit->number, hit->name);
 }
