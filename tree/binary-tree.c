@@ -30,6 +30,18 @@ node_t* search(node_t *root, const char* name) {
 	return root;
 }
 
+int depth(node_t *root) {
+	if (!root) {
+		return 0;
+	}
+	int l = depth(root->left);
+	int r = depth(root->right);
+	if (l > r) {
+		return l + 1;
+	}
+	return r + 1;
+}
+
 node_t* insert(node_t *root, node_t *node) {
 	int a = strcmp(root->name,node->name);
 	if (a > 0) {
@@ -101,4 +113,6 @@ void main(int argc, const char *argv[]) {
 	printf("search\n");
 	node_t* hit = search(root, "花うさぎ");
 	printf("%s,%s\n", hit->number, hit->name);
+	
+	printf("depth %d\n", depth(root));
 }

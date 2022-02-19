@@ -33,147 +33,192 @@ node_t* search(node_t *root, const char* name) {
 	return root;
 }
 
-node_t* balance(node_t *root, node_t *node, label_t label) {
-	switch (node->label) {
+node_t* balance(node_t *theroot, node_t *root, label_t label) {
+	switch (root->label) {
 		case E:
-		node->label = label;
-		if (node->parent) {
-			return balance(root, node->parent, node->parent->left == node ? L : R);
+		root->label = label;
+		if (root->parent) {
+			return balance(theroot, root->parent, root->parent->left == root ? L : R);
 		}
 		break;
 		
 		case L:
 		if (label == R) {
-			node->label = E;
+			root->label = E;
 			break;
 		}
-		node_t* left = node->left;
+		node_t* left = root->left;
 		if (left->label == R) {
 			if (left->right == NULL) {
 				exit(1);
 			}
-			left->label = E;
-			left->right->parent = node;
-			node->left = left->right;
-			if (node->left->left) {
-				node->left->left->parent = left;
+			switch(left->right->label) {
+				case L:
+					root->label = R;
+					left->label = E;
+				break;
+				case R:
+					root->label = E;
+					left->label = L;
+				break;
+				default:
+					root->label = left->label = E;
+				break;
 			}
-			left->right = node->left->left;
-			left->parent = node->left;
-			node->left->left = left;
+			left->right->parent = root;
+			root->left = left->right;
+			if (root->left->left) {
+				root->left->left->parent = left;
+				if (left->left == NULL) {
+					printf("Illegal state.\n");
+					exit(1);
+				}
+			}
+			left->right = root->left->left;
+			left->parent = root->left;
+			root->left->left = left;
 			left = left->parent;
-			node->label = R;
 		}
 		else {
-			node->label = E;
+			root->label = E;
 		}
 		left->label = E;
 		if (left->right) {
-			left->right->parent = node;
+			left->right->parent = root;
 		}
-		node->left = left->right;
-		left->parent = node->parent;
+		root->left = left->right;
+		left->parent = root->parent;
 		if (left->parent) {
-			if (left->parent->left == node) {
+			if (left->parent->left == root) {
 				left->parent->left = left;
 			}
 			else {
-				if (left->parent->right != node) {
+				if (left->parent->right != root) {
+					printf("Illegal state.\n");
 					exit(1);
 				}
 				left->parent->right = left;
 			}
 		}
 		else {
-			root = left;
+			theroot = left;
 		}
-		node->parent = left;
-		left->right = node;
+		root->parent = left;
+		left->right = root;
 		break;
 		
 		case R:
 		if (label == L) {
-			node->label = E;
+			root->label = E;
 			break;
 		}
-		node_t* right = node->right;
+		node_t* right = root->right;
 		if (right->label == L) {
 			if (right->left == NULL) {
+				printf("Illegal state.\n");
 				exit(1);
 			}
-			right->label = E;
-			right->left->parent = node;
-			node->right = right->left;
-			if (node->right->right) {
-				node->right->right->parent = right;
+			switch(right->left->label) {
+				case R:
+					root->label = L;
+					right->label = E;
+				break;
+				case L:
+					root->label = E;
+					right->label = R;
+				break;
+				default:
+					root->label = right->label = E;
+				break;
 			}
-			right->left = node->right->right;
-			right->parent = node->right;
-			node->right->right = right;
+			right->left->parent = root;
+			root->right = right->left;
+			if (root->right->right) {
+				root->right->right->parent = right;
+			}
+			right->left = root->right->right;
+			right->parent = root->right;
+			root->right->right = right;
 			right = right->parent;
-			node->label = L;
 		}
 		else {
-			node->label = E;
+			root->label = E;
 		}
 		right->label = E;
 		if (right->left) {
-			right->left->parent = node;
+			right->left->parent = root;
 		}
-		node->right = right->left;
-		right->parent = node->parent;
+		root->right = right->left;
+		right->parent = root->parent;
 		if (right->parent) {
-			if (right->parent->left == node) {
+			if (right->parent->left == root) {
 				right->parent->left = right;
 			}
 			else {
-				if (right->parent->right != node) {
+				if (right->parent->right != root) {
+					printf("Illegal state.\n");
 					exit(1);
 				}
 				right->parent->right = right;
 			}
 		}
 		else {
-			root = right;
+			theroot = right;
 		}
-		node->parent = right;
-		right->left = node;
+		root->parent = right;
+		right->left = root;
 		break;
 		
 		default:
 		exit(1);
 		break;
 	}
-	return root;
+	return theroot;
 }
 
-node_t* insert_internal(node_t *root, node_t *subtree, node_t *node) {
-	int a = strcmp(subtree->name,node->name);
+int depth(node_t *root) {
+	if (!root) {
+		return 0;
+	}
+	int l = depth(root->left);
+	int r = depth(root->right);
+	if (l >= r + 2 || r >= l + 2) {
+		printf("Illegal state: %d %d\n", l, r);
+		exit(1);
+	}
+	if (l > r) {
+		return l + 1;
+	}
+	return r + 1;
+}
+
+node_t* insert_internal(node_t *theroot, node_t *root, node_t *node) {
+	int a = strcmp(root->name, node->name);
 	if (a > 0) {
-		if (subtree->left) {
-			return insert_internal(root, subtree->left, node);
+		if (root->left) {
+			return insert_internal(theroot, root->left, node);
 		}
 		else {
-			subtree->left = node;
-			node->parent = subtree;
+			root->left = node;
+			node->parent = root;
 			node->left = node->right = NULL;
 			node->label = E;
-			return balance(root, node->parent, L);
+			return balance(theroot, node->parent, L);
 		}
 	}
 	else if (a < 0) {
-		if (subtree->right) {
-			return insert_internal(root, subtree->right, node);
+		if (root->right) {
+			return insert_internal(theroot, root->right, node);
 		}
 		else {
-			subtree->right = node;
-			node->parent = subtree;
+			root->right = node;
+			node->parent = root;
 			node->left = node->right = NULL;
 			node->label = E;
-			return balance(root, node->parent, R);
+			return balance(theroot, node->parent, R);
 		}
 	}
-	return root;
+	return theroot;
 }
 
 node_t* insert(node_t *root, node_t *node) {
@@ -227,4 +272,6 @@ void main(int argc, const char *argv[]) {
 	printf("search\n");
 	node_t* hit = search(root, "花うさぎ");
 	printf("%s,%s\n", hit->number, hit->name);
+	
+	printf("depth %d\n", depth(root));
 }
