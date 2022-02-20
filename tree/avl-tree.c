@@ -19,16 +19,21 @@ struct node {
 };
 
 node_t* search(node_t *root, const char* name) {
+	if (root == NULL) {
+		return NULL;
+	}
 	int a = strcmp(root->name, name);
 	if (a > 0) {
 		if (root->left) {
 			return search(root->left, name);
 		}
+		return NULL;
 	}
 	else if (a < 0) {
 		if (root->right) {
 			return search(root->right, name);
 		}
+		return NULL;
 	}
 	return root;
 }
@@ -176,22 +181,6 @@ node_t* balance(node_t *theroot, node_t *root, label_t label) {
 	return theroot;
 }
 
-int depth(node_t *root) {
-	if (!root) {
-		return 0;
-	}
-	int l = depth(root->left);
-	int r = depth(root->right);
-	if (l >= r + 2 || r >= l + 2) {
-		printf("Illegal state: %d %d\n", l, r);
-		exit(1);
-	}
-	if (l > r) {
-		return l + 1;
-	}
-	return r + 1;
-}
-
 node_t* insert_internal(node_t *theroot, node_t *root, node_t *node) {
 	int a = strcmp(root->name, node->name);
 	if (a > 0) {
@@ -223,6 +212,22 @@ node_t* insert_internal(node_t *theroot, node_t *root, node_t *node) {
 
 node_t* insert(node_t *root, node_t *node) {
 	return insert_internal(root, root, node);
+}
+
+int depth(node_t *root) {
+	if (root == NULL) {
+		return 0;
+	}
+	int l = depth(root->left);
+	int r = depth(root->right);
+	if (l >= r + 2 || r >= l + 2) {
+		printf("Illegal state: %d %d\n", l, r);
+		exit(1);
+	}
+	if (l > r) {
+		return l + 1;
+	}
+	return r + 1;
 }
 
 void main(int argc, const char *argv[]) {
