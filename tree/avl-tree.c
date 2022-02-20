@@ -176,6 +176,9 @@ node_t* balance(node_t *theroot, node_t *root, label_t label) {
 }
 
 node_t* insert_internal(node_t *theroot, node_t *root, node_t *node) {
+	if (theroot == NULL) {
+		return node;
+	}
 	int a = strcmp(root->name, node->name);
 	if (a > 0) {
 		if (root->left) {
