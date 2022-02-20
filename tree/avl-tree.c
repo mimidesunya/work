@@ -24,16 +24,10 @@ node_t* search(node_t *root, const char* name) {
 	}
 	int a = strcmp(root->name, name);
 	if (a > 0) {
-		if (root->left) {
-			return search(root->left, name);
-		}
-		return NULL;
+		return search(root->left, name);
 	}
 	else if (a < 0) {
-		if (root->right) {
-			return search(root->right, name);
-		}
-		return NULL;
+		return search(root->right, name);
 	}
 	return root;
 }
