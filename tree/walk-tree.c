@@ -210,24 +210,23 @@ node_t* insert(node_t *root, node_t *node) {
 }
 
 void walk(node_t *node) {
-	printf("%s", node->name);
-	node_t *next;
-	if (node->right) {
-		next = node->right;
-		while(next->left) {
-				next = next->left;
+	OUTER: while (node != NULL) {
+		printf("%s", node->name);
+		if (node->right != NULL) {
+			node = node->right;
+			while(node->left != NULL) {
+					node = node->left;
+			}
+			continue;
 		}
-		walk(next);
-		return;
-	}
-	next = node;
-	while(next->parent) {
-		if (next == next->parent->left) {
-			next = next->parent;
-			walk(next);
-			return;
+		while(node->parent != NULL) {
+			if (node == node->parent->left) {
+				node = node->parent;
+				goto OUTER;
+			}
+			node = node->parent;
 		}
-		next = next->parent;
+		break;
 	}
 }
 
