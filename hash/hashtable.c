@@ -11,6 +11,20 @@ typedef struct {
 	char* number;
 } entry;
 
+size_t next_prime(size_t a) {
+	OUTER: for (;;) {
+		const size_t max = sqrt(a);
+		for (size_t i = 2; i <= max; ++i) {
+			if (a % i == 0) {
+				a++;
+				goto OUTER;
+			}
+		}
+		break;
+	}
+	return a;
+}
+
 size_t hash(const char* key, const size_t tableSize) {
 	size_t h = 0;
 	size_t len = strlen(key);
@@ -81,17 +95,7 @@ void main(int argc, const char *argv[]) {
 		return;
 	}
 
-	size_t tableSize = limit * 2;
-	OUTER: for (;;) {
-		const size_t max = sqrt(tableSize);
-		for (size_t i = 2; i <= max; ++i) {
-			if (tableSize % i == 0) {
-				tableSize++;
-				goto OUTER;
-			}
-		}
-		break;
-	}
+	size_t tableSize = next_prime(limit * 2);
 	
 	entry **table = (entry**)malloc(sizeof(entry*) * tableSize);
 	if (!table) {
@@ -137,7 +141,7 @@ void main(int argc, const char *argv[]) {
 		printf("%s,%s\n", hit->number, hit->name);
 	}
 	
-	size_t newSize = tableSize * 1.5;
+	size_t newSize = next_prime(tableSize * 1.5);
 	printf("rehash %ld\n", newSize);
 	table = rehash(table, tableSize, newSize);
 	tableSize = newSize;
