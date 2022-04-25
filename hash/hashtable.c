@@ -20,6 +20,28 @@ size_t hash(const char* key, const size_t tableSize) {
 	return h % tableSize;
 }
 
+void insert(entry **table, const size_t tableSize, entry *e) {
+	size_t i = hash(e->name, tableSize);
+	while (table[i] != NULL && table[i] != DELETED) {
+		i = (i + 1) % tableSize;
+	}
+	table[i] = e;
+}
+
+entry** rehash(entry **table, const size_t tableSize, const size_t newSize) {
+	entry **newTable = (entry**)malloc(sizeof(entry*) * newSize);
+	for (size_t i = 0; i < newSize; ++i) {
+		newTable[i] = NULL;
+	}
+	for (size_t i = 0; i < tableSize; ++i) {
+		if (table[i] != NULL && table[i] != DELETED) {
+			insert(newTable, newSize, table[i]);
+		}
+	}
+	free(table);
+	return newTable;
+}
+
 entry* search(entry **table, const size_t tableSize, const char* name) {
 	size_t i = hash(name, tableSize);
 	while (table[i] != NULL) {
@@ -29,14 +51,6 @@ entry* search(entry **table, const size_t tableSize, const char* name) {
 		i = (i + 1) % tableSize;
 	}
 	return NULL;
-}
-
-void insert(entry **table, const size_t tableSize, entry *e) {
-	size_t i = hash(e->name, tableSize);
-	while (table[i] != NULL && table[i] != DELETED) {
-		i = (i + 1) % tableSize;
-	}
-	table[i] = e;
 }
 
 entry* erase(entry **table, const size_t tableSize, const char* name) {
@@ -118,8 +132,21 @@ void main(int argc, const char *argv[]) {
 	}
 	
 	printf("search\n");
-	entry* hit = search(table, tableSize, "花うさぎ");
-	printf("%s,%s\n", hit->number, hit->name);
+	{
+		entry* hit = search(table, tableSize, "花うさぎ");
+		printf("%s,%s\n", hit->number, hit->name);
+	}
+	
+	size_t newSize = tableSize * 1.5;
+	printf("rehash %ld\n", newSize);
+	table = rehash(table, tableSize, newSize);
+	tableSize = newSize;
+	
+	printf("search\n");
+	{
+		entry* hit = search(table, tableSize, "花うさぎ");
+		printf("%s,%s\n", hit->number, hit->name);
+	}
 	
 	{
 		char line[700];
