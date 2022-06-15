@@ -1,4 +1,4 @@
-#include "map.h"
+#include "sortedmap.h"
 #include <stddef.h>
 
-map* create_treemap(size_t size);
+sortedmap* create_treemap(size_t size);

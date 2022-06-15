@@ -6,8 +6,8 @@
 
 void main(int argc, const char *argv[]) {
 	const size_t size = 30000000L;
-	const size_t limit = 10000;
-	map* map = create_treemap(size);
+	const size_t limit = size;
+	map* varmap = (map*)create_treemap(size);
 
 	char *data = (char*)malloc(100L * size);
 	if (!data) {
@@ -29,7 +29,7 @@ void main(int argc, const char *argv[]) {
 			char* value = pdata;
 			char* key = pdata + (comma - line) + 1;
 			
-			map_insert(map, key, value);
+			map_insert(varmap, key, value);
 			
 			i++;
 			if (i % 10000 == 0) {
@@ -45,8 +45,18 @@ void main(int argc, const char *argv[]) {
 	
 	printf("search\n");
 	{
-		char* hit = map_search(map, "花うさぎ");
+		char* hit = map_search(varmap, "花うさぎ");
 		printf("%s\n", hit);
+	}
+	
+	printf("walk\n");
+	{
+		iterator* itr = sortedmap_iterator((sortedmap*)varmap, "花うさ", "花より");
+		while(itr_has_next(itr)) {
+			itr_next(itr);
+			printf("%s %s\n", itr_key(itr), itr_value(itr));
+		}
+		itr_dispose(itr);
 	}
 	
 	{
@@ -63,7 +73,7 @@ void main(int argc, const char *argv[]) {
 			
 			char *key = pdata + (comma - line) + 1;
 			
-			char* value = map_remove(map, key);
+			char* value = map_remove(varmap, key);
 			
 			i++;
 			if (i % 10000 == 0) {
@@ -77,5 +87,5 @@ void main(int argc, const char *argv[]) {
 		fclose(fp);
 	}
 
-	map_dispose(map);
+	map_dispose(varmap);
 }

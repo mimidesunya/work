@@ -204,25 +204,48 @@ void tree_insert(void *data, char* key, char* value) {
 	tree->root = insert_internal(tree->root, tree->root, node);
 }
 
+node_t* next_node(node_t* node) {
+	if (node->right != NULL) {
+		node = node->right;
+		while(node->left != NULL) {
+				node = node->left;
+		}
+	}
+	else {
+		while(node->parent != NULL) {
+			if (node == node->parent->left) {
+				node = node->parent;
+				break;
+			}
+			node = node->parent;
+		}
+	}
+	return node;
+}
 
-node_t* internal_search(node_t *node, char* key) {
+node_t* equal_or_next(node_t *node, char* key) {
 	if (node == NULL) {
 		return NULL;
 	}
 	int a = strcmp(node->key, key);
 	if (a > 0) {
-		node = internal_search(node->left, key);
+		node = equal_or_next(node->left, key);
 	}
 	else if (a < 0) {
-		node = internal_search(node->right, key);
+		if (node->right != NULL) {
+			node = equal_or_next(node->right, key);
+		}
+		else {
+			node = next_node(node);
+		}
 	}
 	return node;
 }
 
 char* tree_search(void* data, char* key) {
 	tree_data *tree = data;
-	node_t* node = internal_search(tree->root, key);
-	return node == NULL ? NULL : node->value;
+	node_t* node = equal_or_next(tree->root, key);
+	return (node == NULL || strcmp(node->key, key) != 0) ? NULL : node->value;
 }
 
 node_t* remove_balance(node_t *theroot, node_t *root, label_t label) {
@@ -518,8 +541,8 @@ node_t* internal_remove(node_t *root, node_t *node) {
 
 char* tree_remove(void* data, char* key) {
 	tree_data *tree = data;
-	node_t* node = internal_search(tree->root, key);
-	if (node == NULL) {
+	node_t* node = equal_or_next(tree->root, key);
+	if (node == NULL || strcmp(node->key, key) != 0) {
 		return NULL;
 	}
 	char* value = node->value;
@@ -528,17 +551,86 @@ char* tree_remove(void* data, char* key) {
 	return value;
 }
 
+void node_dispose(node_t* node) {
+	if (node == NULL) {
+		return;
+	}
+	node_dispose(node->left);
+	node_dispose(node->right);
+	free(node);
+}
+
 void tree_dispose(void* data) {
 	tree_data *tree = data;
+	node_dispose(tree->root);
 	free(tree);
 }
 
-extern map* create_treemap(size_t size) {
-	map* treemap = malloc(sizeof(map));
+typedef struct {
+	node_t *current;
+	node_t *next;
+	char* key2;
+} tree_itr_data;
+
+bool tree_itr_has_next(void* data) {
+	tree_itr_data* itr_data = (tree_itr_data*)data;
+	return itr_data->next != NULL;
+}
+
+void tree_itr_next(void* data) {
+	tree_itr_data* itr_data = (tree_itr_data*)data;
+	if (itr_data->next == NULL) {
+		return;
+	}
+	itr_data->current = itr_data->next;
+	itr_data->next = next_node(itr_data->next);
+	if (itr_data->next != NULL) {
+		if (strcmp(itr_data->next->key, itr_data->key2) > 0) {
+			itr_data->next = NULL;
+		}
+	}
+}
+
+char* tree_itr_key(void* data) {
+	tree_itr_data* itr_data = (tree_itr_data*)data;
+	return itr_data->current->key;
+}
+
+char* tree_itr_value(void* data) {
+	tree_itr_data* itr_data = (tree_itr_data*)data;
+	return itr_data->current->value;
+}
+
+void tree_itr_dispose(void* data) {
+	tree_itr_data* itr_data = (tree_itr_data*)data;
+	free(itr_data->key2);
+	free(itr_data);
+}
+
+iterator* tree_iterator(void* data, char* key1, char* key2)	{
+	tree_data *tree = data;
+	iterator* itr = malloc(sizeof(iterator));
+	itr->has_next = tree_itr_has_next;
+	itr->next = tree_itr_next;
+	itr->key = tree_itr_key;
+	itr->value = tree_itr_value;
+	itr->dispose = tree_itr_dispose;
+	tree_itr_data* itr_data = itr->data =  malloc(sizeof(tree_itr_data));
+	itr_data->current = NULL;
+	itr_data->next = equal_or_next(tree->root, key1);
+	itr_data->key2 = malloc(strlen(key2) + 1);
+	strcpy(itr_data->key2, key2);
+	return itr;
+}
+
+
+extern sortedmap* create_treemap(size_t size) {
+	sortedmap* treemap = malloc(sizeof(sortedmap));
 	treemap->insert = tree_insert;
 	treemap->search = tree_search;
 	treemap->remove = tree_remove;
 	treemap->dispose = tree_dispose;
+	treemap->iterator = tree_iterator;
 	tree_data* data = treemap->data = malloc(sizeof(tree_data));
 	data->root = NULL;
 	return treemap;
