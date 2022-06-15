@@ -624,7 +624,7 @@ iterator* tree_iterator(void* data, char* key1, char* key2)	{
 }
 
 
-extern sortedmap* create_treemap(size_t size) {
+extern sortedmap* create_treemap() {
 	sortedmap* treemap = malloc(sizeof(sortedmap));
 	treemap->insert = tree_insert;
 	treemap->search = tree_search;

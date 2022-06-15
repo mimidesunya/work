@@ -6,8 +6,8 @@
 
 void main(int argc, const char *argv[]) {
 	const size_t size = 30000000L;
-	const size_t limit = size;
-	map* varmap = (map*)create_treemap(size);
+	const size_t limit = 10000;
+	map* varmap = (map*)create_treemap();
 
 	char *data = (char*)malloc(100L * size);
 	if (!data) {
