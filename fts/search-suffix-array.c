@@ -49,4 +49,3 @@ void main(int argc, const char *argv[]) {
 	fclose(ip);
 	fclose(fp);
 }
-}
