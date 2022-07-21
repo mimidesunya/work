@@ -10,19 +10,19 @@ int compare_sa(const void *a, const void *b) {
 }
 
 void main(int argc, const char *argv[]) {
+	const char* file = argv[1];
 	const size_t len = 10000;
+	text = malloc(len);
+	text[len - 1] = 0;
+	
 	printf("読み込み len=%ld\n", len);
 	{
-		FILE* fp = fopen(argv[1], "rb");
-		fseek(fp, 0, SEEK_SET);
-		text = malloc(len);
+		FILE* fp = fopen(file, "rb");
 		fread(text, 1, len - 1, fp);
-		text[len - 1] = 0;
 		fclose(fp);
 	}
 
 	uint32_t* sa = malloc(sizeof(uint32_t) * len);
-
 	for (size_t i = 0; i < len; ++i) {
 		sa[i] = (uint32_t)i;
 	}
