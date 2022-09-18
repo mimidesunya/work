@@ -71,7 +71,8 @@ void induced_sort(
 }
 
 // 接尾辞配列誘導整列
-void sa_is(suffix_array_t* sa, const uint32_t* str, const uint32_t len, const uint32_t blen) {
+void sa_is(const uint32_t* str, suffix_array_t* sa,
+	const uint32_t len, const uint32_t blen) {
 	// バケットごとに計数
 	uint32_t* buckets = malloc(sizeof(uint32_t) * blen);
 	memset(buckets, 0, sizeof(uint32_t) * blen);
@@ -171,7 +172,7 @@ void sa_is(suffix_array_t* sa, const uint32_t* str, const uint32_t len, const ui
 		uint32_t rlen = mcount + 1;
 		suffix_array_t* rsa = malloc(sizeof(suffix_array_t) * rlen);
 		lmsstr[mcount] = 0;
-		sa_is(rsa, lmsstr, rlen, msort + 1);
+		sa_is(lmsstr, rsa, rlen, msort + 1);
 		
 		// 再整列したLMS
 		suffix_array_t* rlmsa = malloc(sizeof(suffix_array_t) * mcount);
@@ -203,7 +204,7 @@ void main(int argc, const char *argv[]) {
 		str[i] = (unsigned char)STRING[i];
 	}
 	suffix_array_t* sa = malloc(sizeof(suffix_array_t) * len);
-	sa_is(sa, str, len, 256);
+	sa_is(str, sa, len, 256);
 	
 	// 表示
 	printf("整列済み接尾辞配列\n");
