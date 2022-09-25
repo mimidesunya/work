@@ -11,7 +11,7 @@ int compare_sa(const void *a, const void *b) {
 
 void main(int argc, const char *argv[]) {
 	const char* file = argv[1];
-	const size_t len = 10000;
+	const size_t len = 30000000;
 	text = malloc(len);
 	text[len - 1] = 0;
 	
