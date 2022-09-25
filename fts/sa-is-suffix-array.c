@@ -11,30 +11,32 @@ typedef struct suffix_array {
 // 誘導整列
 void induced_sort(
 	const uint32_t* str,
-	const suffix_array_t *orgsa, suffix_array_t* sa, const int len,
-	const suffix_array_t* lmsa, const int mcount,
-	const uint32_t* buckets, const int blen) {
+	suffix_array_t* sa, const uint32_t len,
+	const suffix_array_t* lmsa, const uint32_t mcount,
+	const uint32_t* buckets, const uint32_t blen) {
 	// バケットごとの底辺を求める
 	uint32_t* bucketBottoms = malloc(sizeof(uint32_t) * blen);
 	{
-		int j = 0;
-		for (int i = 0; i < blen; ++i) {
+		uint32_t j = 0;
+		for (uint32_t i = 0; i < blen; ++i) {
 			j += buckets[i];
 			bucketBottoms[i] = j - 1;
 		}
 	}
 
 	// バケットごとに分類
+	suffix_array_t* orgsa = sa;
+	sa = malloc(sizeof(suffix_array_t) * len);
 	memset(sa, 0, sizeof(suffix_array_t) * len);
 	// LMSだけを埋める
-	for (int i = mcount - 1; i >= 0; --i) {
+	for (uint32_t i = mcount - 1; i != -1; --i) {
 		sa[bucketBottoms[str[lmsa[i].pos]]--] = lmsa[i];
 	}
 	// バケットごとの上辺と底辺を求める
 	uint32_t* bucketTops = malloc(sizeof(uint32_t) * blen);
 	{
-		int j = 0;
-		for (int i = 0; i < blen; ++i) {
+		uint32_t j = 0;
+		for (uint32_t i = 0; i < blen; ++i) {
 			bucketTops[i] = j;
 			j += buckets[i];
 			bucketBottoms[i] = j - 1;
@@ -42,30 +44,33 @@ void induced_sort(
 	}
 	
 	// Lを埋める
-	for (int i = 0; i < len; ++i) {
+	for (uint32_t i = 0; i < len; ++i) {
 		if (sa[i].type != 0 && sa[i].pos > 0 && orgsa[sa[i].pos - 1].type == 'L') {
 			sa[bucketTops[str[sa[i].pos - 1]]++] = orgsa[sa[i].pos - 1];
 		}
 	}
 	// Mを消す
-	for (int i = 0; i < len; ++i) {
+	for (uint32_t i = 0; i < len; ++i) {
 		if (sa[i].type == 'M') {
 			sa[i].type = 0;
 		}
 	}
 	// Sを埋める
-	for (int i = len - 1; i >= 0; --i) {
+	for (uint32_t i = len - 1; i != -1; --i) {
 		if (sa[i].type != 0 && sa[i].pos > 0 && (orgsa[sa[i].pos - 1].type == 'S' || orgsa[sa[i].pos - 1].type == 'M')) {
 			sa[bucketBottoms[str[sa[i].pos - 1]]--] = orgsa[sa[i].pos - 1];
 		}
 	}
 	sa[0] = orgsa[len - 1];
+	memcpy(orgsa, sa, sizeof(suffix_array_t) * len);
+	free(sa);
 	free(bucketBottoms);
 	free(bucketTops);
 }
 
 // 接尾辞配列誘導整列
-void sa_is(suffix_array_t* sa, const uint32_t* str, const int len, const int blen) {
+void sa_is(const uint32_t* str, suffix_array_t* sa,
+	const uint32_t len, const uint32_t blen) {
 	// バケットごとに計数
 	uint32_t* buckets = malloc(sizeof(uint32_t) * blen);
 	memset(buckets, 0, sizeof(uint32_t) * blen);
@@ -109,7 +114,7 @@ void sa_is(suffix_array_t* sa, const uint32_t* str, const int len, const int ble
 	printf("誘導整列\n");
 	suffix_array_t* orgsa = malloc(sizeof(suffix_array_t) * len);
 	memcpy(orgsa, sa, sizeof(suffix_array_t) * len);
-	induced_sort(str, orgsa, sa, len, lmsa, mcount, buckets, blen);
+	induced_sort(str, sa, len, lmsa, mcount, buckets, blen);
 	
 	// LMSの順序
 	printf("LMS部分文字列を抽出\n");
@@ -142,7 +147,7 @@ void sa_is(suffix_array_t* sa, const uint32_t* str, const int len, const int ble
 		int rlen = mcount + 1;
 		suffix_array_t* rsa = malloc(sizeof(suffix_array_t) * rlen);
 		lmsstr[mcount] = 0;
-		sa_is(rsa, lmsstr, rlen, msort + 1);
+		sa_is(lmsstr, rsa, rlen, msort + 1);
 		
 		// 再整列したLMS
 		suffix_array_t* rlmsa = malloc(sizeof(suffix_array_t) * mcount);
@@ -155,7 +160,7 @@ void sa_is(suffix_array_t* sa, const uint32_t* str, const int len, const int ble
 		// 再度誘導整列
 		printf("再整列\n");
 		memcpy(sa, orgsa, sizeof(suffix_array_t) * len);
-		induced_sort(str, orgsa, sa, len, lmsa, mcount, buckets, blen);
+		induced_sort(str, sa, len, lmsa, mcount, buckets, blen);
 	}
 	
 	free(buckets);
@@ -165,7 +170,7 @@ void sa_is(suffix_array_t* sa, const uint32_t* str, const int len, const int ble
 }
 
 void main(int argc, const char *argv[]) {
-	const size_t len = 10000;
+	const size_t len = 30000000;
 	printf("読み込み len=%ld\n", len);
 	char* text;
 	{
@@ -185,7 +190,7 @@ void main(int argc, const char *argv[]) {
 	
 	printf("整列\n");
 	suffix_array_t* sa = malloc(sizeof(suffix_array_t) * len);
-	sa_is(sa, str, len, 256);
+	sa_is(str, sa, len, 256);
 	free(str);
 	
 	printf("出力\n");

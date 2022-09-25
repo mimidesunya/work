@@ -96,6 +96,40 @@ void sa_is(const uint32_t* str, suffix_array_t* sa,
 		}
 		buckets[str[i]]++;
 	}
+	
+	// 表示
+	printf("最初の状態\n");
+	for (int i = 0; i < len; ++i) {
+		char* type = "   ";
+		switch(sa[i].type) {
+			case 0:
+			printf("\n");
+			continue;
+			
+			case 'L':
+			type = "(L)     ";
+			break;
+			
+			case 'S':
+			type = "(S)     ";
+			break;
+			
+			case 'M':
+			type = "(S) LMS ";
+			break;
+		}
+		printf("%2d %s", sa[i].pos, type);
+		for (int j = i; j < len; ++j) {
+			uint32_t c = str[sa[j].pos];
+			if (c < 20) {
+				printf("[%2d]", c);
+			}
+			else {
+				printf("%c", c);
+			}
+		}
+		printf("\n");
+	}
 
 	// LMSを抽出
 	suffix_array_t* lmsa = malloc(sizeof(suffix_array_t) * mcount);
@@ -137,7 +171,7 @@ void sa_is(const uint32_t* str, suffix_array_t* sa,
 				printf("%2d ", msort);
 				for (uint32_t j = lmsa[lpos].pos; j < lmsa[lpos].pos + llen; ++j) {
 					if(str[j] < 0x20) {
-						printf("[%d]", str[j]);
+						printf("[%2d]", str[j]);
 					}
 					else {
 						printf("%c", str[j]);
@@ -147,31 +181,14 @@ void sa_is(const uint32_t* str, suffix_array_t* sa,
 			}
 		}
 	}
-	
-	// LMS部分文字列
-	printf("LMS部分文字列\n");
-	for (uint32_t i = 0; i < mcount; ++i) {
-		uint32_t llen = (i == mcount - 1) ? 1 : lmsa[i + 1].pos - lmsa[i].pos + 1;
-		printf("%2d %2d ", i, lmsstr[i]);
-		for (uint32_t j = lmsa[i].pos; j < lmsa[i].pos + llen; ++j) {
-			if(str[j] < 0x20) {
-				printf("[%d]", str[j]);
-			}
-			else {
-				printf("%c", str[j]);
-			}
-		}
-		printf("\n");
-	}
-	
 	free(lmspos);
 	
 	// LMS部分文字列がユニークであることが終了条件
 	if (msort != mcount) {
 		// lmsstrに対して再帰処理
+		printf("再帰 mcount=%d msort=%d\n", mcount, msort);
 		uint32_t rlen = mcount + 1;
 		suffix_array_t* rsa = malloc(sizeof(suffix_array_t) * rlen);
-		lmsstr[mcount] = 0;
 		sa_is(lmsstr, rsa, rlen, msort + 1);
 		
 		// 再整列したLMS

@@ -31,13 +31,12 @@ void main(int argc, const char *argv[]) {
 		fread(&pos, POS_SIZE, 1, ip);
 		fseek(fp, pos, SEEK_SET);
 		fread(str, 1, len, fp);
-		printf("s=%s, pos=%d\n", str, pos);
 		int ret = strcmp(str, w);
 		if (ret == 0) {
 			fseek(fp, pos, SEEK_SET);
 			char s[100];
 			fread(s, 1, sizeof(s), fp);
-			printf("Hit: %d:%s\n", pos, s);
+			printf("Hit: pos=%d data=%s\n", pos, s);
 			break;
 		}
 		if (ret < 0) {
